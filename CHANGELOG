@@ -1,3 +1,7 @@
+v0.0.2
++ updated deps to chromedp 0.5.3
++ fix all broken deps
+
 v0.0.1
 + Initial
 + canvas image region click sample
