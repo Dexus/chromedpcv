@@ -12,7 +12,7 @@ func WindowSize() string {
 }
 
 // source: https://stackoverflow.com/questions/8813051/determine-which-element-the-mouse-pointer-is-on-top-of-in-javascript
-func GetElementsXPathForPoint(x, y int64) string {
+func GetElementsXPathForPoint(x, y float64) string {
 	return fmt.Sprintf(`(function (x, y) {
 
     let getPathTo = function(element) {

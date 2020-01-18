@@ -7,6 +7,6 @@ type BrowserWindow struct {
 
 type BrowserWindowPosition struct {
 	window *BrowserWindow
-	X      int64
-	Y      int64
+	X      float64
+	Y      float64
 }

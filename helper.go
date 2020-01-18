@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
 
 	"github.com/pkg/errors"
@@ -27,9 +26,9 @@ func fileExists(filepath string) bool {
 	return true
 }
 
-func screenShotToTempFile(ctxt context.Context, h cdp.Executor) (tempFilePath string, err error) {
+func screenShotToTempFile(ctxt context.Context) (tempFilePath string, err error) {
 	var screenShotBytes []byte
-	err = chromedp.CaptureScreenshot(&screenShotBytes).Do(ctxt, h)
+	err = chromedp.CaptureScreenshot(&screenShotBytes).Do(ctxt)
 	if err != nil {
 		return tempFilePath, errors.Wrap(err, `chromedp.CaptureScreenshot`)
 	}

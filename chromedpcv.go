@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/rand99/chromedpcv/javascript"
+	"github.com/Dexus/chromedpcv/javascript"
 
 	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
@@ -17,7 +17,7 @@ import (
 	"gocv.io/x/gocv"
 )
 
-// ChromeDpCV
+// ChromeDpCV struct
 type ChromeDpCV struct {
 	// TemplateMatchMarkedScreenShotFilePath allows to to keep an image of the screenshot where the searched region is marked, this helps with debugging
 	TemplateMatchMarkedScreenShotFilePath string
@@ -27,23 +27,25 @@ type ChromeDpCV struct {
 	Debug bool
 }
 
+// New create a ChromeDpCV object
 func New() *ChromeDpCV {
 	return &ChromeDpCV{
-		Debug:                                 false,
+		Debug:                                 true,
 		TemplateMatchMarkedScreenShotFilePath: "",
 		TemplateMatchMode:                     gocv.TmCcoeffNormed,
 		IMReadFlag:                            gocv.IMReadColor,
 	}
 }
 
+// MouseClickWhereScreenLooksLike MouseClickWhereScreenLooksLike
 func (c *ChromeDpCV) MouseClickWhereScreenLooksLike(targetImagePath string, opts ...chromedp.MouseOption) chromedp.Action {
-	return chromedp.ActionFunc(func(ctxt context.Context, h cdp.Executor) error {
+	return chromedp.ActionFunc(func(ctxt context.Context) error {
 		var position BrowserWindowPosition
-		err := c.PositionWhereScreenLooksLike(targetImagePath, &position).Do(ctxt, h)
+		err := c.PositionWhereScreenLooksLike(targetImagePath, &position).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
-		err = chromedp.MouseClickXY(position.X, position.Y, opts...).Do(ctxt, h)
+		err = chromedp.MouseClickXY(position.X, position.Y, opts...).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
@@ -51,9 +53,10 @@ func (c *ChromeDpCV) MouseClickWhereScreenLooksLike(targetImagePath string, opts
 	})
 }
 
+// MouseClickAtPosition MouseClickAtPosition
 func (c *ChromeDpCV) MouseClickAtPosition(position *BrowserWindowPosition, opts ...chromedp.MouseOption) chromedp.Action {
-	return chromedp.ActionFunc(func(ctxt context.Context, h cdp.Executor) error {
-		err := chromedp.MouseClickXY(position.X, position.Y, opts...).Do(ctxt, h)
+	return chromedp.ActionFunc(func(ctxt context.Context) error {
+		err := chromedp.MouseClickXY(position.X, position.Y, opts...).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
@@ -61,14 +64,15 @@ func (c *ChromeDpCV) MouseClickAtPosition(position *BrowserWindowPosition, opts 
 	})
 }
 
+// NodesWhereScreenLooksLike NodesWhereScreenLooksLike
 func (c *ChromeDpCV) NodesWhereScreenLooksLike(targetImagePath string, resultNodes *[]*cdp.Node) chromedp.Action {
-	return chromedp.ActionFunc(func(ctxt context.Context, h cdp.Executor) error {
+	return chromedp.ActionFunc(func(ctxt context.Context) error {
 		var position BrowserWindowPosition
-		err := c.PositionWhereScreenLooksLike(targetImagePath, &position).Do(ctxt, h)
+		err := c.PositionWhereScreenLooksLike(targetImagePath, &position).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
-		err = c.NodesAtPosition(&position, resultNodes).Do(ctxt, h)
+		err = c.NodesAtPosition(&position, resultNodes).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
@@ -76,10 +80,11 @@ func (c *ChromeDpCV) NodesWhereScreenLooksLike(targetImagePath string, resultNod
 	})
 }
 
+// NodesAtPosition NodesAtPosition
 func (c *ChromeDpCV) NodesAtPosition(position *BrowserWindowPosition, resultNodes *[]*cdp.Node) chromedp.Action {
-	return chromedp.ActionFunc(func(ctxt context.Context, h cdp.Executor) error {
+	return chromedp.ActionFunc(func(ctxt context.Context) error {
 		var xPaths []string
-		err := chromedp.Evaluate(javascript.GetElementsXPathForPoint(position.X, position.Y), &xPaths).Do(ctxt, h)
+		err := chromedp.Evaluate(javascript.GetElementsXPathForPoint(position.X, position.Y), &xPaths).Do(ctxt)
 		if err != nil {
 			return c.errorDebug(err)
 		}
@@ -88,7 +93,7 @@ func (c *ChromeDpCV) NodesAtPosition(position *BrowserWindowPosition, resultNode
 			xpath = strings.ToLower("//" + xpath)
 
 			var tmpNodes []*cdp.Node
-			err = chromedp.Nodes(xpath, &tmpNodes, chromedp.BySearch).Do(ctxt, h)
+			err = chromedp.Nodes(xpath, &tmpNodes, chromedp.BySearch).Do(ctxt)
 			if err != nil {
 				return c.errorDebug(err)
 			}
@@ -104,14 +109,15 @@ func (c *ChromeDpCV) NodesAtPosition(position *BrowserWindowPosition, resultNode
 	})
 }
 
+// PositionWhereScreenLooksLike PositionWhereScreenLooksLike
 func (c *ChromeDpCV) PositionWhereScreenLooksLike(targetImagePath string, position *BrowserWindowPosition) chromedp.Action {
-	return chromedp.ActionFunc(func(ctxt context.Context, h cdp.Executor) error {
+	return chromedp.ActionFunc(func(ctxt context.Context) error {
 		c.printDebug("Getting position for " + targetImagePath)
 		if c == nil {
 			return errors.New("c can't be nil for GetPositionOfRegionThatLooksLike func")
 		}
 		// 1. Create screenShot and save to temporary file
-		screenShotFilePath, err := screenShotToTempFile(ctxt, h)
+		screenShotFilePath, err := screenShotToTempFile(ctxt)
 		if err != nil {
 			return err
 		}
@@ -119,7 +125,7 @@ func (c *ChromeDpCV) PositionWhereScreenLooksLike(targetImagePath string, positi
 
 		exists := fileExists(screenShotFilePath)
 		if !exists {
-			return errors.Errorf("temp file %s doesn't exist", screenShotFilePath)
+			return errors.Errorf("temp file %s doesn't exist\n", screenShotFilePath)
 		}
 
 		// 2. Read screenShot data
@@ -147,6 +153,7 @@ func (c *ChromeDpCV) PositionWhereScreenLooksLike(targetImagePath string, positi
 		} else {
 			matchLoc = maxLoc
 		}
+
 		// Optional: save screenshots with marked targetImage region
 		if c.TemplateMatchMarkedScreenShotFilePath != "" {
 			gocv.Rectangle(
@@ -156,28 +163,31 @@ func (c *ChromeDpCV) PositionWhereScreenLooksLike(targetImagePath string, positi
 					matchLoc.Y,
 					matchLoc.X+targetImageMat.Cols(),
 					matchLoc.Y+targetImageMat.Rows()),
-				color.RGBA{R: 239, A: 26, B: 26, G: 1},
+				color.RGBA{R: 239, A: 1, B: 26, G: 26},
 				4)
 
 			didWrite := gocv.IMWrite(c.TemplateMatchMarkedScreenShotFilePath, screenShotMat)
 			if !didWrite {
 				return errors.Errorf(
-					"gocv: error writing marked screenshot to file:",
+					"gocv: error writing marked screenshot to file: %s",
 					c.TemplateMatchMarkedScreenShotFilePath)
 			}
 		}
 
 		// 5. Calculate click coordinates
 		// and be aware of differences between image size and BrowserWindow size (retina displays)
-		screenShotWidth, screenShotHeight := int64(screenShotMat.Cols()), int64(screenShotMat.Rows())
+		screenShotWidth, screenShotHeight := float64(screenShotMat.Cols()), float64(screenShotMat.Rows())
 		window := BrowserWindow{}
-		err = chromedp.Evaluate(javascript.WindowSize(), &window).Do(ctxt, h)
+		err = chromedp.Evaluate(javascript.WindowSize(), &window).Do(ctxt)
 		if err != nil {
 			return errors.Wrap(err, `Evaluate("BrowserWindow.innerWidth;"`)
 		}
-		widthRatio, heightRatio := screenShotWidth/window.Width, screenShotHeight/window.Height
-		targetImageX0, targetImageY0 := int64(matchLoc.X), int64(matchLoc.Y)
-		targetImageWidth, targetImageHeight := int64(targetImageMat.Cols()), int64(targetImageMat.Rows())
+		widthRatio, heightRatio := screenShotWidth/float64(window.Width), screenShotHeight/float64(window.Height)
+		c.printDebug(fmt.Sprintf("w: %f -- h: %f", widthRatio, heightRatio))
+		targetImageX0, targetImageY0 := float64(matchLoc.X), float64(matchLoc.Y)
+		c.printDebug(fmt.Sprintf("w: %f -- h: %f", targetImageX0, targetImageY0))
+		targetImageWidth, targetImageHeight := float64(targetImageMat.Cols()), float64(targetImageMat.Rows())
+		c.printDebug(fmt.Sprintf("w: %f -- h: %f", targetImageWidth, targetImageHeight))
 
 		if position == nil {
 			position = &BrowserWindowPosition{}
@@ -188,6 +198,7 @@ func (c *ChromeDpCV) PositionWhereScreenLooksLike(targetImagePath string, positi
 		return nil
 	})
 }
+
 func (c *ChromeDpCV) printDebug(str string) {
 	if c.Debug {
 		fmt.Println(str)
