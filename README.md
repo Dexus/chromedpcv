@@ -8,17 +8,13 @@ You can also just get the position or the node(s) at that position.
 
 ### Install
 ```bash
+# opencv: stable 4.2.0 (bottled)
 brew install opencv
 ```
-
-opencv: stable 4.0.1 (bottled)
-Open source computer vision library
-https://opencv.org/
-/usr/local/Cellar/opencv/4.0.1 (679 files, 226MB) *
-  Poured from bottle on 2019-01-24 at 22:34:46
+alternative for linux look to the [gocv Dockerfile](https://github.com/hybridgroup/gocv/blob/master/Dockerfile) how to build it right.
 
 ```bash
-go get -u github.com/rand99/chromedpcv
+go get -u github.com/Dexus/chromedpcv
 ```
 
 
@@ -26,15 +22,12 @@ go get -u github.com/rand99/chromedpcv
 
 ```bash
 cd example
-./download_chromium
+# install chrome or chromium browser
 go build . && ./example
 ```
 
 ##### Documentation
-[godoc](https://godoc.org/github.com/rand99/chromedpcv)
+[godoc](https://godoc.org/github.com/Dexus/chromedpcv)
 
 ##### Known issues
-chrome headless doesn't work, must be a chromedp thing
-```bash
-2019/02/10 19:33:51 timeout waiting for initial target
-```
+ - the search image **must** match the real size to get correct position
